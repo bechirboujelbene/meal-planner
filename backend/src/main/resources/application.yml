@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: meal-planner-backend
+  threads:
+    virtual:
+      enabled: true
+  docker:
+    compose:
+      # Local Postgres + Redis are defined once at the repo root
+      file: ../compose.yaml
+      lifecycle-management: start-only
+  flyway:
+    enabled: true
+  modulith:
+    events:
+      jdbc:
+        schema-initialization:
+          enabled: true
+  ai:
+    # LLM integration is off by default so the app and tests run without API keys.
+    # Enable with SPRING_AI_MODEL_CHAT=google-genai and GOOGLE_API_KEY (see .env.example).
+    model:
+      chat: none
+      embedding: none
+      image: none
+      moderation: none
+      audio:
+        speech: none
+        transcription: none
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,modulith
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs

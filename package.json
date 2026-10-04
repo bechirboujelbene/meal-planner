@@ -1,0 +1,15 @@
+{
+  "name": "meal-planner",
+  "private": true,
+  "packageManager": "pnpm@10.11.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:web": "pnpm --filter @meal-planner/web dev",
+    "build:web": "pnpm --filter @meal-planner/web build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  }
+}

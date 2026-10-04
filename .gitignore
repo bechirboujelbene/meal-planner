@@ -1,0 +1,45 @@
+# OS / editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.iml
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Java / Gradle
+backend/build/
+backend/.gradle/
+backend/bin/
+backend/out/
+
+# Node
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+playwright-report/
+test-results/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Terraform
+infra/terraform/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+
+# Crawled raw data is never committed
+ingest/data/
+backend/.jqwik-database

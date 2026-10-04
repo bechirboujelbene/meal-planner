@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      web: ${{ steps.filter.outputs.web }}
+      ingest: ${{ steps.filter.outputs.ingest }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend: ['backend/**', 'compose.yaml', '.github/workflows/ci.yml']
+            web: ['apps/web/**', 'packages/**', 'pnpm-lock.yaml', '.github/workflows/ci.yml']
+            ingest: ['ingest/**', '.github/workflows/ci.yml']
+
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      # Tests use Testcontainers (Postgres + Redis); Docker is available on ubuntu-latest runners
+      - run: ./gradlew build --console=plain
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: modulith-docs
+          path: backend/build/spring-modulith-docs
+
+  web:
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @meal-planner/web lint
+      - run: pnpm --filter @meal-planner/web typecheck
+      - run: pnpm --filter @meal-planner/web test
+      - run: pnpm --filter @meal-planner/web build
+
+  ingest:
+    needs: changes
+    if: needs.changes.outputs.ingest == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ingest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      - run: uv run pytest

@@ -1,0 +1,13 @@
+{
+  "name": "@meal-planner/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "OpenAPI spec exported from the Spring Boot backend + generated TypeScript types",
+  "types": "./src/schema.d.ts",
+  "scripts": {
+    "generate": "openapi-typescript ./openapi.json -o ./src/schema.d.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7"
+  }
+}
